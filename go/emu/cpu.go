@@ -6,7 +6,7 @@ type CPU struct {
 	Vc [16]uint8
 	Stack [16]uint16
 	Memory [4096]uint8
-	Screen [64][32]uint8
+	Screen [32][64]uint8
 	opcode uint8
 }
 
@@ -33,7 +33,7 @@ func (cpu *CPU) _0NNN() {
 
 // clear screen
 func (cpu *CPU) _00E0() {
-	var blank [64][32]uint8
+	var blank [32][64]uint8
 	cpu.Screen = blank
 }
 
