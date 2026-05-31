@@ -1,5 +1,10 @@
 package emu
 
+import (
+	"fmt"
+	"strings"
+)
+
 type CPU struct {
 	Pc uint8
 	I uint16
@@ -8,16 +13,49 @@ type CPU struct {
 	Memory [4096]uint8
 	Screen [32][64]uint8
 	opcode uint8
+	lookup []INSTRUCTION
+}
+
+
+type INSTRUCTION struct {
+	name string
+	Operate func(*CPU)
 }
 
 
 func NewCPU() *CPU {
 	cpu := CPU{}
-	opcode := 0x00
+	//opcode := 0x00
 
-	//lookup := []{}
+	cpu.lookup = []INSTRUCTION{
+		INSTRUCTION{"00E0", (*CPU)._00E0},
+	}
 
 	return &cpu
+}
+
+
+func (cpu *CPU) Render() {
+	const mapping = ".#"
+
+	var sb strings.Builder
+
+	sb.WriteString("\n[SCREEN]\n")
+
+	for _, row := range cpu.Screen {
+		for _, val := range row {
+			sb.WriteByte(mapping[val])
+		}
+		sb.WriteByte('\n')
+	}
+
+	fmt.Print(sb.String())
+}
+
+
+func (cpu *CPU) RunInstruction(ins_byte uint8) {
+	inst := cpu.lookup[ins_byte]
+	inst.Operate(cpu)
 }
 
 
