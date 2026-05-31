@@ -15,14 +15,14 @@ func NewCPU() *CPU {
 	cpu := CPU{}
 	opcode := 0x00
 
-	lookup = []uint8
+	//lookup := []{}
+
+	return &cpu
 }
 
 
 func (cpu *CPU) Clock() {
-	cpu.opcode := cpu.Read(cpu.Pc)
 
-	inst := cpu.lookup[cpu.opcode]
 }
 
 
@@ -53,11 +53,6 @@ func (cpu *CPU) _2NNN() {
 }
 
 
-func (cpu *CPU) _0NNN() {
-	
-}
-
-
 func (cpu *CPU) _3XNN() {
 	
 }
@@ -74,16 +69,6 @@ func (cpu *CPU) _5XY0() {
 
 
 func (cpu *CPU) _9XY0() {
-	
-}
-
-
-func (cpu *CPU) _3XNN() {
-	
-}
-
-
-func (cpu *CPU) _5XY0() {
 	
 }
 
