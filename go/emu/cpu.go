@@ -12,7 +12,7 @@ type CPU struct {
 
 
 func NewCPU() *CPU {
-	cpu := CPU()
+	cpu := CPU{}
 	opcode := 0x00
 
 	lookup = []uint8
