@@ -134,8 +134,8 @@ func (cpu *CPU) _2NNN() {
 
 // skip one instruction if VX == NN
 func (cpu *CPU) _3XNN() {
-	reg := uint8((cpu.oprand & 0x0F00) > 8)
-	if cpu.Vc[reg] == uint8(cpu.oprand & 0x00FF) {
+	vx := uint8((cpu.oprand & 0x0F00) > 8)
+	if cpu.Vc[vx] == uint8(cpu.oprand & 0x00FF) {
 		cpu.Pc += 2
 	}
 }
@@ -143,8 +143,8 @@ func (cpu *CPU) _3XNN() {
 
 // skip one instruction if VX != NN
 func (cpu *CPU) _4XNN() {
-	reg := uint8((cpu.oprand & 0x0F00) > 8)
-	if cpu.Vc[reg] != uint8(cpu.oprand & 0x00FF) {
+	vx := uint8((cpu.oprand & 0x0F00) > 8)
+	if cpu.Vc[vx] != uint8(cpu.oprand & 0x00FF) {
 		cpu.Pc += 2
 	}
 }
@@ -170,15 +170,17 @@ func (cpu *CPU) _9XY0() {
 }
 
 
-// set
+// set register
 func (cpu *CPU) _6XNN() {
-	reg := uint8((cpu.oprand & 0x0F00) > 8)
-	cpu.Vc[reg] = uint8(cpu.oprand & 0x00FF)
+	vx := uint8((cpu.oprand & 0x0F00) > 8)
+	cpu.Vc[vx] = uint8(cpu.oprand & 0x00FF)
 }
 
 
+// add
 func (cpu *CPU) _7XNN() {
-	
+	vx := uint8((cpu.oprand & 0x0F00) > 8)
+	cpu.Vc[vx] += uint8(cpu.oprand & 0x00FF)
 }
 
 
