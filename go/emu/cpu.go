@@ -54,7 +54,7 @@ func (cpu *CPU) Render() {
 }
 
 
-func (cpu *CPU) ReadMemory(addr uint8) uint16 {
+func (cpu *CPU) ReadInstruction(addr uint8) uint16 {
 	return uint16(cpu.Memory[addr]) << 8 | uint16(cpu.Memory[addr + 1])
 }
 
@@ -79,7 +79,7 @@ NNN - last three nibbles, a 12-bit immediate memory address (0010 0110 1011)
 func (cpu *CPU) RunInstruction(ins uint16) {
 	cpu.opcode = uint8((ins & 0xF000) >> 12)
 	cpu.oprand = ins & 0x0FFF
-	
+
 	inst := cpu.lookup[cpu.opcode]
 	fmt.Printf("Running instruction: %s", inst.name)
 	inst.Operate(cpu)
@@ -90,7 +90,7 @@ func (cpu *CPU) Clock() {
 	// fetch instruction from memory at the PC
 	// decode the instruction to find out what the emu should do
 	// execute the instruction
-	ins := cpu.ReadMemory(cpu.Pc)
+	ins := cpu.ReadInstruction(cpu.Pc)
 	cpu.Pc += 2
 
 	cpu.RunInstruction(ins)
