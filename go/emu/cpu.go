@@ -170,7 +170,7 @@ func (cpu *CPU) _9XY0() {
 }
 
 
-// set register
+// set VX to NN
 func (cpu *CPU) _6XNN() {
 	vx := uint8((cpu.oprand & 0x0F00) > 8)
 	cpu.Vc[vx] = uint8(cpu.oprand & 0x00FF)
@@ -184,38 +184,76 @@ func (cpu *CPU) _7XNN() {
 }
 
 
+// set VX to VY
 func (cpu *CPU) _8XY0() {
-	
+	vx := uint8((cpu.oprand & 0x0F00) > 8)
+	vy := uint8((cpu.oprand & 0x00F0) > 4)
+	cpu.Vc[vx] = cpu.Vc[vy]
 }
 
 
+// binary OR
 func (cpu *CPU) _8XY1() {
-	
+	vx := uint8((cpu.oprand & 0x0F00) > 8)
+	vy := uint8((cpu.oprand & 0x00F0) > 4)
+	cpu.Vc[vx] |= cpu.Vc[vy]
 }
 
 
+// binary AND
 func (cpu *CPU) _8XY2() {
-	
+	vx := uint8((cpu.oprand & 0x0F00) > 8)
+	vy := uint8((cpu.oprand & 0x00F0) > 4)
+	cpu.Vc[vx] &= cpu.Vc[vy]
 }
 
 
+// binary XOR
 func (cpu *CPU) _8XY3() {
-	
+	vx := uint8((cpu.oprand & 0x0F00) > 8)
+	vy := uint8((cpu.oprand & 0x00F0) > 4)
+	cpu.Vc[vx] ^= cpu.Vc[vy]
 }
 
 
+// add (VX + VY)
 func (cpu *CPU) _8XY4() {
-	
+	vx := uint8((cpu.oprand & 0x0F00) > 8)
+	vy := uint8((cpu.oprand & 0x00F0) > 4)
+	sum := cpu.Vc[vx] + cpu.Vc[vy]
+
+	if sum < cpu.Vc[vx] {
+		cpu.Vc[0xFF] = 0x01
+	}
+	cpu.Vc[vx] = sum
 }
 
 
+// subtract (VX - VY)
 func (cpu *CPU) _8XY5() {
-	
+	vx := uint8((cpu.oprand & 0x0F00) > 8)
+	vy := uint8((cpu.oprand & 0x00F0) > 4)
+
+	if cpu.Vc[vx] >= cpu.Vc[vy] {
+		cpu.Vc[0xFF] = 0x01
+	} else {
+		cpu.Vc[0xFF] = 0x00
+	}
+	cpu.Vc[vx] -= cpu.Vc[vy]
 }
 
 
+// subtract (VY - VX)
 func (cpu *CPU) _8XY7() {
-	
+	vx := uint8((cpu.oprand & 0x0F00) > 8)
+	vy := uint8((cpu.oprand & 0x00F0) > 4)
+
+	if cpu.Vc[vy] >= cpu.Vc[vx] {
+		cpu.Vc[0xFF] = 0x01
+	} else {
+		cpu.Vc[0xFF] = 0x00
+	}
+	cpu.Vc[vx] = cpu.Vc[vy] - cpu.Vc[vx]
 }
 
 
