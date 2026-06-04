@@ -12,7 +12,7 @@ type CPU struct {
 	Stack [16]uint16
 	Memory [4096]uint8  // 4kB memory space
 	Screen [32][64]uint8
-	opcode uint16
+	opcode uint8
 	lookup []INSTRUCTION
 }
 
@@ -58,8 +58,26 @@ func (cpu *CPU) ReadMemory(addr uint8) uint16 {
 }
 
 
-func (cpu *CPU) RunInstruction(ins_byte uint16) {
-	inst := cpu.lookup[ins_byte]
+/*
+CHIP-8 Instruction Breakdown
+[Each instruction is 2 bytes]
+
+The 2 bytes can be broken down into different sections (layed out below). How the instruction is broken down
+depends on the specific instruction being run.
+
+1010 0010 0110 1011
+
+op - first nibble, primary opcode group (1010)
+VC - second nibble, usually looking up one of the registers (V0 - VF) (0010)
+Y - third nibble, usually looking up a second register (0110)
+N - fourth nibble, a 4-bit immediate value (1011)
+KK - second byte (last two nibbles), a 8-bit immediate value (0110 1011)
+NNN - last three nibbles, a 12-bit immediate memory address (0010 0110 1011)
+
+*/
+func (cpu *CPU) RunInstruction(ins uint16) {
+	cpu.opcode = uint8((ins & 0xF000) >> 12)
+	inst := cpu.lookup[cpu.opcode]
 	fmt.Printf("Running instruction: %s", inst.name)
 	inst.Operate(cpu)
 }
@@ -69,10 +87,10 @@ func (cpu *CPU) Clock() {
 	// fetch instruction from memory at the PC
 	// decode the instruction to find out what the emu should do
 	// execute the instruction
-	cpu.opcode = cpu.ReadMemory(cpu.Pc)
+	ins := cpu.ReadMemory(cpu.Pc)
 	cpu.Pc += 2
 
-	cpu.RunInstruction(cpu.opcode)
+	cpu.RunInstruction(ins)
 }
 
 
