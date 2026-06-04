@@ -13,6 +13,7 @@ type CPU struct {
 	Memory [4096]uint8  // 4kB memory space
 	Screen [32][64]uint8
 	opcode uint8
+	oprand uint16
 	lookup []INSTRUCTION
 }
 
@@ -67,7 +68,7 @@ depends on the specific instruction being run.
 
 1010 0010 0110 1011
 
-op - first nibble, primary opcode group (1010)
+OP - first nibble, primary opcode group (1010)
 VC - second nibble, usually looking up one of the registers (V0 - VF) (0010)
 Y - third nibble, usually looking up a second register (0110)
 N - fourth nibble, a 4-bit immediate value (1011)
@@ -77,6 +78,8 @@ NNN - last three nibbles, a 12-bit immediate memory address (0010 0110 1011)
 */
 func (cpu *CPU) RunInstruction(ins uint16) {
 	cpu.opcode = uint8((ins & 0xF000) >> 12)
+	cpu.oprand = ins & 0x0FFF
+	
 	inst := cpu.lookup[cpu.opcode]
 	fmt.Printf("Running instruction: %s", inst.name)
 	inst.Operate(cpu)
