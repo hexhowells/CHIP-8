@@ -6,13 +6,13 @@ import (
 )
 
 type CPU struct {
-	Pc uint8
-	I uint16
-	Vc [16]uint8
+	Pc uint8  // program counter
+	I uint16  // index register
+	Vc [16]uint8  // variable registers (16 8-bit)
 	Stack [16]uint16
-	Memory [4096]uint8
+	Memory [4096]uint8  // 4kB memory space
 	Screen [32][64]uint8
-	opcode uint8
+	opcode uint16
 	lookup []INSTRUCTION
 }
 
@@ -53,14 +53,26 @@ func (cpu *CPU) Render() {
 }
 
 
-func (cpu *CPU) RunInstruction(ins_byte uint8) {
+func (cpu *CPU) ReadMemory(addr uint8) uint16 {
+	return uint16(cpu.Memory[addr]) << 8 | uint16(cpu.Memory[addr + 1])
+}
+
+
+func (cpu *CPU) RunInstruction(ins_byte uint16) {
 	inst := cpu.lookup[ins_byte]
+	fmt.Printf("Running instruction: %s", inst.name)
 	inst.Operate(cpu)
 }
 
 
 func (cpu *CPU) Clock() {
+	// fetch instruction from memory at the PC
+	// decode the instruction to find out what the emu should do
+	// execute the instruction
+	cpu.opcode = cpu.ReadMemory(cpu.Pc)
+	cpu.Pc += 2
 
+	cpu.RunInstruction(cpu.opcode)
 }
 
 
