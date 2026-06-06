@@ -272,7 +272,7 @@ func (cpu *CPU) _8XYE() {
 
 
 func (cpu *CPU) _ANNN() {
-	
+	cpu.I = cpu.oprand & 0x0FFF
 }
 
 
