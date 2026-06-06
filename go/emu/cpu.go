@@ -223,7 +223,7 @@ func (cpu *CPU) _8XY4() {
 	sum := cpu.Vc[vx] + cpu.Vc[vy]
 
 	if sum < cpu.Vc[vx] {
-		cpu.Vc[0xF] = 0x01
+		cpu.Vc[0x0F] = 0x01
 	}
 	cpu.Vc[vx] = sum
 }
@@ -235,9 +235,9 @@ func (cpu *CPU) _8XY5() {
 	vy := uint8((cpu.oprand & 0x00F0) >> 4)
 
 	if cpu.Vc[vx] >= cpu.Vc[vy] {
-		cpu.Vc[0xF] = 0x01
+		cpu.Vc[0x0F] = 0x01
 	} else {
-		cpu.Vc[0xF] = 0x00
+		cpu.Vc[0x0F] = 0x00
 	}
 	cpu.Vc[vx] -= cpu.Vc[vy]
 }
@@ -249,9 +249,9 @@ func (cpu *CPU) _8XY7() {
 	vy := uint8((cpu.oprand & 0x00F0) >> 4)
 
 	if cpu.Vc[vy] >= cpu.Vc[vx] {
-		cpu.Vc[0xF] = 0x01
+		cpu.Vc[0x0F] = 0x01
 	} else {
-		cpu.Vc[0xF] = 0x00
+		cpu.Vc[0x0F] = 0x00
 	}
 	cpu.Vc[vx] = cpu.Vc[vy] - cpu.Vc[vx]
 }
@@ -259,14 +259,14 @@ func (cpu *CPU) _8XY7() {
 
 func (cpu *CPU) _8XY6() {
 	vx := uint8((cpu.oprand & 0x0F00) >> 8)
-	cpu.Vc[0xF] = cpu.Vc[vx] & 0x01
+	cpu.Vc[0x0F] = cpu.Vc[vx] & 0x01
 	cpu.Vc[vx] >>= 0x01
 }
 
 
 func (cpu *CPU) _8XYE() {
 	vx := uint8((cpu.oprand & 0x0F00) >> 8)
-	cpu.Vc[0xF] = (cpu.Vc[vx] & 0x80) >> 0x07
+	cpu.Vc[0x0F] = (cpu.Vc[vx] & 0x80) >> 0x07
 	cpu.Vc[vx] <<= 0x01
 }
 
