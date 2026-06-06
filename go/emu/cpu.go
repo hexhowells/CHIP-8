@@ -258,12 +258,16 @@ func (cpu *CPU) _8XY7() {
 
 
 func (cpu *CPU) _8XY6() {
-	
+	vx := uint8((cpu.oprand & 0x0F00) >> 8)
+	cpu.Vc[0xFF] = cpu.Vc[vx] & 0x01
+	cpu.Vc[vx] >>= 0x01
 }
 
 
 func (cpu *CPU) _8XYE() {
-	
+	vx := uint8((cpu.oprand & 0x0F00) >> 8)
+	cpu.Vc[0xFF] = (cpu.Vc[vx] & 0x80) >> 0x07
+	cpu.Vc[vx] <<= 0x01
 }
 
 
