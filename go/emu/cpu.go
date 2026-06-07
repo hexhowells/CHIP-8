@@ -201,7 +201,6 @@ func (cpu *CPU) RunInstruction(ins uint16) {
 	cpu.Oprand = ins & 0x0FFF
 
 	inst := cpu.lookup[cpu.Opcode]
-	//fmt.Printf("Running instruction: %s", inst.name)
 	inst.Operate(cpu)
 }
 
