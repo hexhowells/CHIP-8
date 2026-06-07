@@ -62,7 +62,7 @@ func (cpu *CPU) PrintCPU() {
 	fmt.Println("------------------------------------------------------------")
 	fmt.Printf("| %-12s | $%-12.4X | %-25s |\n", "pc", cpu.Pc, "Program counter (8-bit)")
 	fmt.Printf("| %-12s | $%-12.4X | %-25s |\n", "i", cpu.I, "Index register (16-bit)")
-	fmt.Printf("| %-12s | $%-12.4X | %-25s |\n", "sp", cpu.sp, "stack pointer")
+	fmt.Printf("| %-12s | $%-12.4X | %-25s |\n", "sp", cpu.sp, "Stack pointer")
 	fmt.Printf("| %-12s | $%-12.2X | %-25s |\n", "opcode", cpu.opcode, "Current opcode byte")
 	fmt.Printf("| %-12s | $%-12.4X | %-25s |\n", "oprand", cpu.oprand, "Current operand")
 	
@@ -73,8 +73,8 @@ func (cpu *CPU) PrintCPU() {
 	fmt.Printf("| %-12s | %-13s | %-25s |\n", "stack[sp]", stackVal, "Value at top of stack")
 	
 	fmt.Println("------------------------------------------------------------")
-	fmt.Printf("| %-43s |\n", "Variable Registers (V0 - VF)")
-	fmt.Println("------------------------------------------------------------")
+	fmt.Printf("| %-45s |\n", "Variable Registers (V0 - VF)  ")
+	fmt.Println("-------------------------------------------------")
 	
 	for i := 0; i < 16; i += 4 {
 		fmt.Printf("| V%X: $%.2X   | V%X: $%.2X   | V%X: $%.2X   | V%X: $%.2X   |\n",
@@ -84,7 +84,7 @@ func (cpu *CPU) PrintCPU() {
 			i+3, cpu.Vc[i+3],
 		)
 	}
-	fmt.Println("------------------------------------------------------------")
+	fmt.Println("-------------------------------------------------")
 }
 
 
