@@ -171,7 +171,7 @@ func (cpu *CPU) PrintCPU() {
 	}
 	fmt.Println("-------------------------------------------------")
 
-	// memory dump (512 bytes, excluding the first 512 bytes, so we can see the ROM data)
+	// memory dump (shows first 512 bytes of loaded ROM)
 	fmt.Println("\n------------------------------------------------------------")
 	fmt.Printf("| %-56s |\n", "Memory Dump (0x0200 - 0x03FF)")
 	fmt.Println("------------------------------------------------------------")
