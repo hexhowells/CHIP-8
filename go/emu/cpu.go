@@ -10,9 +10,9 @@ type CPU struct {
 	Pc uint16  // program counter
 	I uint16  // index register
 	Vc [16]uint8  // variable registers (16 8-bit)
-	Stack [16]uint16
+	stack [16]uint16
 	sp uint16  // stack pointer
-	Memory [4096]uint8  // 4kB memory space
+	memory [4096]uint8  // 4kB memory space
 	Screen [32][64]uint8
 	opcode uint8
 	oprand uint16
@@ -62,13 +62,13 @@ func (cpu *CPU) PrintCPU() {
 	fmt.Println("------------------------------------------------------------")
 	fmt.Printf("| %-12s | $%-12.4X | %-25s |\n", "pc", cpu.Pc, "Program counter (8-bit)")
 	fmt.Printf("| %-12s | $%-12.4X | %-25s |\n", "i", cpu.I, "Index register (16-bit)")
-	fmt.Printf("| %-12s | $%-12.4X | %-25s |\n", "sp", cpu.sp, "Stack pointer")
+	fmt.Printf("| %-12s | $%-12.4X | %-25s |\n", "sp", cpu.sp, "stack pointer")
 	fmt.Printf("| %-12s | $%-12.2X | %-25s |\n", "opcode", cpu.opcode, "Current opcode byte")
 	fmt.Printf("| %-12s | $%-12.4X | %-25s |\n", "oprand", cpu.oprand, "Current operand")
 	
 	stackVal := "N/A"
 	if cpu.sp < 16 {
-		stackVal = fmt.Sprintf("$%.4X", cpu.Stack[cpu.sp])
+		stackVal = fmt.Sprintf("$%.4X", cpu.stack[cpu.sp])
 	}
 	fmt.Printf("| %-12s | %-13s | %-25s |\n", "stack[sp]", stackVal, "Value at top of stack")
 	
@@ -89,7 +89,7 @@ func (cpu *CPU) PrintCPU() {
 
 
 func (cpu *CPU) ReadInstruction(addr uint16) uint16 {
-	return uint16(cpu.Memory[addr]) << 8 | uint16(cpu.Memory[addr + 1])
+	return uint16(cpu.memory[addr]) << 8 | uint16(cpu.memory[addr + 1])
 }
 
 
