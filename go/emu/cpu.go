@@ -159,7 +159,7 @@ func (cpu *CPU) _00EE() {
 
 // call subroutine
 func (cpu *CPU) _2NNN() {
-	cpu.stack[cpu.sp] = cp.Pc
+	cpu.stack[cpu.sp] = cpu.Pc
 	cpu.sp += 1
 	cpu.Pc = cpu.oprand
 }
