@@ -71,10 +71,14 @@ type INSTRUCTION struct {
 
 func NewCPU() *CPU {
 	cpu := CPU{}
+	cpu.Pc = 0x0200
 
 	// load instruction lookup table
 	cpu.lookup = []INSTRUCTION{
-		INSTRUCTION{"00E0", (*CPU)._00E0},
+		INSTRUCTION{"MAP0", (*CPU)._MAP0}, INSTRUCTION{"1NNN", (*CPU)._1NNN}, INSTRUCTION{"2NNN", (*CPU)._2NNN}, INSTRUCTION{"3XNN", (*CPU)._3XNN},
+		INSTRUCTION{"4XNN", (*CPU)._4XNN}, INSTRUCTION{"5XY0", (*CPU)._5XY0}, INSTRUCTION{"6XNN", (*CPU)._6XNN}, INSTRUCTION{"7XNN", (*CPU)._7XNN},
+		INSTRUCTION{"MAP8", (*CPU)._MAP8}, INSTRUCTION{"9XY0", (*CPU)._9XY0}, INSTRUCTION{"ANNN", (*CPU)._ANNN}, INSTRUCTION{"BNNN", (*CPU)._BNNN},
+		INSTRUCTION{"CXNN", (*CPU)._CXNN}, INSTRUCTION{"DXYN", (*CPU)._DXYN}, INSTRUCTION{"MAPE", (*CPU)._MAPE}, INSTRUCTION{"MAPF", (*CPU)._MAPF},
 	}
 
 	// load fonts into memory
@@ -206,10 +210,10 @@ func (cpu *CPU) RunInstruction(ins uint16) {
 
 
 func (cpu *CPU) Clock() {
-	//ins := cpu.ReadInstruction(cpu.Pc)
+	ins := cpu.ReadInstruction(cpu.Pc)
 	cpu.Pc += 2
 
-	//cpu.RunInstruction(ins)
+	cpu.RunInstruction(ins)
 
 	if cpu.DelayTimer > 0 {
 		cpu.DelayTimer -= 1
@@ -235,6 +239,86 @@ func (cpu *CPU) PressKey(num uint8, down bool) {
 		cpu.keys[num] = 1
 	} else {
 		cpu.keys[num] = 0
+	}
+}
+
+
+func (cpu *CPU) _MAP0() {
+	n := uint8(cpu.Oprand & 0x000F)
+	switch n {
+	case 0x00:
+		cpu._00E0()
+	case 0x0E:
+		cpu._00EE()
+	default:
+		fmt.Errorf("Invalid instruction nibble for 0: %d", n)
+	}
+}
+
+
+func (cpu *CPU) _MAP8() {
+	n := uint8(cpu.Oprand & 0x000F)
+	switch n {
+	case 0x00:
+		cpu._8XY0()
+	case 0x01:
+		cpu._8XY1()
+	case 0x02:
+		cpu._8XY2()
+	case 0x03:
+		cpu._8XY3()
+	case 0x04:
+		cpu._8XY4()
+	case 0x05:
+		cpu._8XY5()
+	case 0x06:
+		cpu._8XY6()
+	case 0x07:
+		cpu._8XY7()
+	case 0x0E:
+		cpu._8XYE()
+	default:
+		fmt.Errorf("Invalid instruction nibble for 0: %d", n)
+	}
+}
+
+
+func (cpu *CPU) _MAPE() {
+	n := uint8(cpu.Oprand & 0x00FF)
+	switch n {
+	case 0x9E:
+		cpu._EX9E()
+	case 0xA1:
+		cpu._EXA1()
+	default:
+		fmt.Errorf("Invalid instruction nibble for 0: %d", n)
+	}
+}
+
+
+func (cpu *CPU) _MAPF() {
+	n := uint8(cpu.Oprand & 0x00FF)
+	switch n {
+	case 0x07:
+		cpu._FX07()
+	case 0x15:
+		cpu._FX15()
+	case 0x18:
+		cpu._FX18()
+	case 0x1E:
+		cpu._FX1E()
+	case 0x0A:
+		cpu._FX0A()
+	case 0x29:
+		cpu._FX29()
+	case 0x33:
+		cpu._FX33()
+	case 0x55:
+		cpu._FX55()
+	case 0x65:
+		cpu._FX65()
+	default:
+		fmt.Errorf("Invalid instruction nibble for 0: %d", n)
 	}
 }
 
