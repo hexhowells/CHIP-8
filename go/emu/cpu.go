@@ -148,24 +148,24 @@ func (cpu *CPU) PrintCPU() {
 	fmt.Printf("| %-12s | $%-12.4X | %-25s |\n", "Sp", cpu.Sp, "Stack pointer")
 	fmt.Printf("| %-12s | $%-12.2X | %-25s |\n", "Opcode", cpu.Opcode, "Current Opcode byte")
 	fmt.Printf("| %-12s | $%-12.4X | %-25s |\n", "Oprand", cpu.Oprand, "Current operand")
-	
+
 	// stack info
 	stackVal := "N/A"
 	if cpu.Sp < 16 {
 		stackVal = fmt.Sprintf("$%.4X", cpu.stack[cpu.Sp])
 	}
 	fmt.Printf("| %-12s | %-13s | %-25s |\n", "stack[Sp]", stackVal, "Value at top of stack")
-	
+
 	// variables
 	fmt.Println("------------------------------------------------------------")
 	fmt.Printf("| %-45s |\n", "Variable Registers (V0 - VF)  ")
 	fmt.Println("-------------------------------------------------")
-	
+
 	for i := 0; i < 16; i += 4 {
 		fmt.Printf("| V%X: $%.2X   | V%X: $%.2X   | V%X: $%.2X   | V%X: $%.2X   |\n",
-			i, cpu.Vc[i], 
-			i+1, cpu.Vc[i+1], 
-			i+2, cpu.Vc[i+2], 
+			i, cpu.Vc[i],
+			i+1, cpu.Vc[i+1],
+			i+2, cpu.Vc[i+2],
 			i+3, cpu.Vc[i+3],
 		)
 	}
@@ -207,9 +207,6 @@ func (cpu *CPU) RunInstruction(ins uint16) {
 
 
 func (cpu *CPU) Clock() {
-	// fetch instruction from memory at the PC
-	// decode the instruction to find out what the emu should do
-	// execute the instruction
 	ins := cpu.ReadInstruction(cpu.Pc)
 	cpu.Pc += 2
 
