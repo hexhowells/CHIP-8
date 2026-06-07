@@ -576,21 +576,40 @@ func (cpu *CPU) _FX0A() {
 }
 
 
+// font character
 func (cpu *CPU) _FX29() {
-	
+	vx := uint8((cpu.Oprand & 0x0F00) >> 8)
+	cpu.I = uint16(cpu.Vc[vx]) * 0x0005
 }
 
 
+// binary-coded decimal conversion
 func (cpu *CPU) _FX33() {
-	
+	vx := uint8((cpu.Oprand & 0x0F00) >> 8)
+	val := cpu.Vc[vx]
+	// 156 -> 1.56
+	// 156 -> 
+	cpu.memory[cpu.I] = val / 100
+	cpu.memory[cpu.I+1] = (val / 10) % 10
+	cpu.memory[cpu.I+2] = val % 10
 }
 
 
+// store registers into memory
 func (cpu *CPU) _FX55() {
-	
+	vx := uint8((cpu.Oprand & 0x0F00) >> 8)
+
+	for i := uint8(0); i <= vx; i++ {
+		cpu.memory[cpu.I + uint16(i)] = cpu.Vc[i]
+	}
 }
 
 
+// load registers from memory
 func (cpu *CPU) _FX65() {
-	
+		vx := uint8((cpu.Oprand & 0x0F00) >> 8)
+
+	for i := uint8(0); i <= vx; i++ {
+		cpu.Vc[i] = cpu.memory[cpu.I + uint16(i)]
+	}
 }
