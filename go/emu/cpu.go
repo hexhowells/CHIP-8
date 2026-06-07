@@ -11,11 +11,12 @@ type CPU struct {
 	I uint16  // index register
 	Vc [16]uint8  // variable registers (16 8-bit)
 	stack [16]uint16
-	sp uint16  // stack pointer
-	memory [4096]uint8  // 4kB memory space
+	Sp uint16  // stack pointer
+	keys [16]uint8
+	memory [4096]uint8  // 4kB memory Space
 	Screen [32][64]uint8
-	opcode uint8
-	oprand uint16
+	Opcode uint8
+	Oprand uint16
 	lookup []INSTRUCTION
 }
 
@@ -28,7 +29,7 @@ type INSTRUCTION struct {
 
 func NewCPU() *CPU {
 	cpu := CPU{}
-	//opcode := 0x00
+	//Opcode := 0x00
 
 	cpu.lookup = []INSTRUCTION{
 		INSTRUCTION{"00E0", (*CPU)._00E0},
@@ -62,15 +63,15 @@ func (cpu *CPU) PrintCPU() {
 	fmt.Println("------------------------------------------------------------")
 	fmt.Printf("| %-12s | $%-12.4X | %-25s |\n", "pc", cpu.Pc, "Program counter (8-bit)")
 	fmt.Printf("| %-12s | $%-12.4X | %-25s |\n", "i", cpu.I, "Index register (16-bit)")
-	fmt.Printf("| %-12s | $%-12.4X | %-25s |\n", "sp", cpu.sp, "Stack pointer")
-	fmt.Printf("| %-12s | $%-12.2X | %-25s |\n", "opcode", cpu.opcode, "Current opcode byte")
-	fmt.Printf("| %-12s | $%-12.4X | %-25s |\n", "oprand", cpu.oprand, "Current operand")
+	fmt.Printf("| %-12s | $%-12.4X | %-25s |\n", "Sp", cpu.Sp, "Stack pointer")
+	fmt.Printf("| %-12s | $%-12.2X | %-25s |\n", "Opcode", cpu.Opcode, "Current Opcode byte")
+	fmt.Printf("| %-12s | $%-12.4X | %-25s |\n", "Oprand", cpu.Oprand, "Current operand")
 	
 	stackVal := "N/A"
-	if cpu.sp < 16 {
-		stackVal = fmt.Sprintf("$%.4X", cpu.stack[cpu.sp])
+	if cpu.Sp < 16 {
+		stackVal = fmt.Sprintf("$%.4X", cpu.stack[cpu.Sp])
 	}
-	fmt.Printf("| %-12s | %-13s | %-25s |\n", "stack[sp]", stackVal, "Value at top of stack")
+	fmt.Printf("| %-12s | %-13s | %-25s |\n", "stack[Sp]", stackVal, "Value at top of stack")
 	
 	fmt.Println("------------------------------------------------------------")
 	fmt.Printf("| %-45s |\n", "Variable Registers (V0 - VF)  ")
@@ -98,11 +99,11 @@ CHIP-8 Instruction Breakdown
 [Each instruction is 2 bytes]
 
 The 2 bytes can be broken down into different sections (layed out below). How the instruction is broken down
-depends on the specific instruction being run.
+depends on the Specific instruction being run.
 
 1010 0010 0110 1011
 
-OP - first nibble, primary opcode group (1010)
+OP - first nibble, primary Opcode group (1010)
 VC (VX/X) - second nibble, usually looking up one of the registers (V0 - VF) (0010)
 Y  (VY) - third nibble, usually looking up a second register (0110)
 N - fourth nibble, a 4-bit immediate value (1011)
@@ -111,11 +112,11 @@ NNN - last three nibbles, a 12-bit immediate memory address (0010 0110 1011)
 
 */
 func (cpu *CPU) RunInstruction(ins uint16) {
-	cpu.opcode = uint8((ins & 0xF000) >> 12)
-	cpu.oprand = ins & 0x0FFF
+	cpu.Opcode = uint8((ins & 0xF000) >> 12)
+	cpu.Oprand = ins & 0x0FFF
 
-	inst := cpu.lookup[cpu.opcode]
-	fmt.Printf("Running instruction: %s", inst.name)
+	inst := cpu.lookup[cpu.Opcode]
+	//fmt.Printf("Running instruction: %s", inst.name)
 	inst.Operate(cpu)
 }
 
@@ -128,6 +129,15 @@ func (cpu *CPU) Clock() {
 	cpu.Pc += 2
 
 	cpu.RunInstruction(ins)
+}
+
+
+func (cpu *CPU) PressKey(num uint8, down bool) {
+	if down {
+		cpu.keys[num] = 1
+	} else {
+		cpu.keys[num] = 0
+	}
 }
 
 
@@ -145,30 +155,30 @@ func (cpu *CPU) _00E0() {
 
 // jump
 func (cpu *CPU) _1NNN() {
-	cpu.Pc = cpu.oprand & 0x0FFF
+	cpu.Pc = cpu.Oprand & 0x0FFF
 }
 
 
 // return from subroutine
 func (cpu *CPU) _00EE() {
-	cpu.Pc = cpu.stack[cpu.sp-1]
-	cpu.stack[cpu.sp] = 0x0000
-	cpu.sp -= 1
+	cpu.Pc = cpu.stack[cpu.Sp-1]
+	cpu.stack[cpu.Sp] = 0x0000
+	cpu.Sp -= 1
 }
 
 
 // call subroutine
 func (cpu *CPU) _2NNN() {
-	cpu.stack[cpu.sp] = cpu.Pc
-	cpu.sp += 1
-	cpu.Pc = cpu.oprand
+	cpu.stack[cpu.Sp] = cpu.Pc
+	cpu.Sp += 1
+	cpu.Pc = cpu.Oprand
 }
 
 
 // skip one instruction if VX == NN
 func (cpu *CPU) _3XNN() {
-	vx := uint8((cpu.oprand & 0x0F00) >> 8)
-	if cpu.Vc[vx] == uint8(cpu.oprand & 0x00FF) {
+	vx := uint8((cpu.Oprand & 0x0F00) >> 8)
+	if cpu.Vc[vx] == uint8(cpu.Oprand & 0x00FF) {
 		cpu.Pc += 2
 	}
 }
@@ -176,8 +186,8 @@ func (cpu *CPU) _3XNN() {
 
 // skip one instruction if VX != NN
 func (cpu *CPU) _4XNN() {
-	vx := uint8((cpu.oprand & 0x0F00) >> 8)
-	if cpu.Vc[vx] != uint8(cpu.oprand & 0x00FF) {
+	vx := uint8((cpu.Oprand & 0x0F00) >> 8)
+	if cpu.Vc[vx] != uint8(cpu.Oprand & 0x00FF) {
 		cpu.Pc += 2
 	}
 }
@@ -185,8 +195,8 @@ func (cpu *CPU) _4XNN() {
 
 // skip one instruction if VX == VY
 func (cpu *CPU) _5XY0() {
-	vx := uint8((cpu.oprand & 0x0F00) >> 8)
-	vy := uint8((cpu.oprand & 0x00F0) >> 4)
+	vx := uint8((cpu.Oprand & 0x0F00) >> 8)
+	vy := uint8((cpu.Oprand & 0x00F0) >> 4)
 	if cpu.Vc[vx] == cpu.Vc[vy] {
 		cpu.Pc += 2
 	}
@@ -195,8 +205,8 @@ func (cpu *CPU) _5XY0() {
 
 // skip one instruction if VX != VY
 func (cpu *CPU) _9XY0() {
-	vx := uint8((cpu.oprand & 0x0F00) >> 8)
-	vy := uint8((cpu.oprand & 0x00F0) >> 4)
+	vx := uint8((cpu.Oprand & 0x0F00) >> 8)
+	vy := uint8((cpu.Oprand & 0x00F0) >> 4)
 	if cpu.Vc[vx] != cpu.Vc[vy] {
 		cpu.Pc += 2
 	}
@@ -205,54 +215,54 @@ func (cpu *CPU) _9XY0() {
 
 // set VX to NN
 func (cpu *CPU) _6XNN() {
-	vx := uint8((cpu.oprand & 0x0F00) >> 8)
-	cpu.Vc[vx] = uint8(cpu.oprand & 0x00FF)
+	vx := uint8((cpu.Oprand & 0x0F00) >> 8)
+	cpu.Vc[vx] = uint8(cpu.Oprand & 0x00FF)
 }
 
 
 // add
 func (cpu *CPU) _7XNN() {
-	vx := uint8((cpu.oprand & 0x0F00) >> 8)
-	cpu.Vc[vx] += uint8(cpu.oprand & 0x00FF)
+	vx := uint8((cpu.Oprand & 0x0F00) >> 8)
+	cpu.Vc[vx] += uint8(cpu.Oprand & 0x00FF)
 }
 
 
 // set VX to VY
 func (cpu *CPU) _8XY0() {
-	vx := uint8((cpu.oprand & 0x0F00) >> 8)
-	vy := uint8((cpu.oprand & 0x00F0) >> 4)
+	vx := uint8((cpu.Oprand & 0x0F00) >> 8)
+	vy := uint8((cpu.Oprand & 0x00F0) >> 4)
 	cpu.Vc[vx] = cpu.Vc[vy]
 }
 
 
 // binary OR
 func (cpu *CPU) _8XY1() {
-	vx := uint8((cpu.oprand & 0x0F00) >> 8)
-	vy := uint8((cpu.oprand & 0x00F0) >> 4)
+	vx := uint8((cpu.Oprand & 0x0F00) >> 8)
+	vy := uint8((cpu.Oprand & 0x00F0) >> 4)
 	cpu.Vc[vx] |= cpu.Vc[vy]
 }
 
 
 // binary AND
 func (cpu *CPU) _8XY2() {
-	vx := uint8((cpu.oprand & 0x0F00) >> 8)
-	vy := uint8((cpu.oprand & 0x00F0) >> 4)
+	vx := uint8((cpu.Oprand & 0x0F00) >> 8)
+	vy := uint8((cpu.Oprand & 0x00F0) >> 4)
 	cpu.Vc[vx] &= cpu.Vc[vy]
 }
 
 
 // binary XOR
 func (cpu *CPU) _8XY3() {
-	vx := uint8((cpu.oprand & 0x0F00) >> 8)
-	vy := uint8((cpu.oprand & 0x00F0) >> 4)
+	vx := uint8((cpu.Oprand & 0x0F00) >> 8)
+	vy := uint8((cpu.Oprand & 0x00F0) >> 4)
 	cpu.Vc[vx] ^= cpu.Vc[vy]
 }
 
 
 // add (VX + VY)
 func (cpu *CPU) _8XY4() {
-	vx := uint8((cpu.oprand & 0x0F00) >> 8)
-	vy := uint8((cpu.oprand & 0x00F0) >> 4)
+	vx := uint8((cpu.Oprand & 0x0F00) >> 8)
+	vy := uint8((cpu.Oprand & 0x00F0) >> 4)
 	sum := cpu.Vc[vx] + cpu.Vc[vy]
 
 	if sum < cpu.Vc[vx] {
@@ -264,8 +274,8 @@ func (cpu *CPU) _8XY4() {
 
 // subtract (VX - VY)
 func (cpu *CPU) _8XY5() {
-	vx := uint8((cpu.oprand & 0x0F00) >> 8)
-	vy := uint8((cpu.oprand & 0x00F0) >> 4)
+	vx := uint8((cpu.Oprand & 0x0F00) >> 8)
+	vy := uint8((cpu.Oprand & 0x00F0) >> 4)
 
 	if cpu.Vc[vx] >= cpu.Vc[vy] {
 		cpu.Vc[0x0F] = 0x01
@@ -278,8 +288,8 @@ func (cpu *CPU) _8XY5() {
 
 // subtract (VY - VX)
 func (cpu *CPU) _8XY7() {
-	vx := uint8((cpu.oprand & 0x0F00) >> 8)
-	vy := uint8((cpu.oprand & 0x00F0) >> 4)
+	vx := uint8((cpu.Oprand & 0x0F00) >> 8)
+	vy := uint8((cpu.Oprand & 0x00F0) >> 4)
 
 	if cpu.Vc[vy] >= cpu.Vc[vx] {
 		cpu.Vc[0x0F] = 0x01
@@ -292,7 +302,7 @@ func (cpu *CPU) _8XY7() {
 
 // 1-bit shift (right)
 func (cpu *CPU) _8XY6() {
-	vx := uint8((cpu.oprand & 0x0F00) >> 8)
+	vx := uint8((cpu.Oprand & 0x0F00) >> 8)
 	cpu.Vc[0x0F] = cpu.Vc[vx] & 0x01
 	cpu.Vc[vx] >>= 0x01
 }
@@ -300,7 +310,7 @@ func (cpu *CPU) _8XY6() {
 
 // 1-bit shift (left)
 func (cpu *CPU) _8XYE() {
-	vx := uint8((cpu.oprand & 0x0F00) >> 8)
+	vx := uint8((cpu.Oprand & 0x0F00) >> 8)
 	cpu.Vc[0x0F] = (cpu.Vc[vx] & 0x80) >> 0x07
 	cpu.Vc[vx] <<= 0x01
 }
@@ -308,20 +318,20 @@ func (cpu *CPU) _8XYE() {
 
 // set index
 func (cpu *CPU) _ANNN() {
-	cpu.I = cpu.oprand & 0x0FFF
+	cpu.I = cpu.Oprand & 0x0FFF
 }
 
 
 // jump with offset
 func (cpu *CPU) _BNNN() {
-	cpu.Pc = (cpu.oprand & 0x0FFF) + uint16(cpu.Vc[0x00])
+	cpu.Pc = (cpu.Oprand & 0x0FFF) + uint16(cpu.Vc[0x00])
 }
 
 
 // random number generator
 func (cpu *CPU) _CXNN() {
-	vx := uint8((cpu.oprand & 0x0F00) >> 8)
-	cpu.Vc[vx] = uint8(rand.Uint32()) & uint8(cpu.oprand & 0x00FF)
+	vx := uint8((cpu.Oprand & 0x0F00) >> 8)
+	cpu.Vc[vx] = uint8(rand.Uint32()) & uint8(cpu.Oprand & 0x00FF)
 }
 
 
@@ -357,13 +367,21 @@ func (cpu *CPU) _FX18() {
 
 // add to index
 func (cpu *CPU) _FX1E() {
-	vx := uint8((cpu.oprand & 0x0F00) >> 8)
+	vx := uint8((cpu.Oprand & 0x0F00) >> 8)
 	cpu.I += uint16(cpu.Vc[vx])
 }
 
 
+// get key
 func (cpu *CPU) _FX0A() {
-	
+	for i := 0; i < 16; i++ {
+		if cpu.keys[i] == 1 {
+			vx := uint8((cpu.Oprand & 0x0F00) >> 8)
+			cpu.Vc[vx] = uint8(i)
+			return
+		}
+	}
+	cpu.Pc -= 2
 }
 
 
