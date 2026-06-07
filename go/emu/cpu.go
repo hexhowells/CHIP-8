@@ -139,6 +139,7 @@ func (cpu *CPU) Render() {
 
 
 func (cpu *CPU) PrintCPU() {
+	// internal values
 	fmt.Println("\n------------------------------------------------------------")
 	fmt.Printf("| %-12s | %-13s | %-25s |\n", "Field", "Value", "Description")
 	fmt.Println("------------------------------------------------------------")
@@ -148,12 +149,14 @@ func (cpu *CPU) PrintCPU() {
 	fmt.Printf("| %-12s | $%-12.2X | %-25s |\n", "Opcode", cpu.Opcode, "Current Opcode byte")
 	fmt.Printf("| %-12s | $%-12.4X | %-25s |\n", "Oprand", cpu.Oprand, "Current operand")
 	
+	// stack info
 	stackVal := "N/A"
 	if cpu.Sp < 16 {
 		stackVal = fmt.Sprintf("$%.4X", cpu.stack[cpu.Sp])
 	}
 	fmt.Printf("| %-12s | %-13s | %-25s |\n", "stack[Sp]", stackVal, "Value at top of stack")
 	
+	// variables
 	fmt.Println("------------------------------------------------------------")
 	fmt.Printf("| %-45s |\n", "Variable Registers (V0 - VF)  ")
 	fmt.Println("-------------------------------------------------")
@@ -167,6 +170,24 @@ func (cpu *CPU) PrintCPU() {
 		)
 	}
 	fmt.Println("-------------------------------------------------")
+
+	// memory dump (512 bytes, excluding the first 512 bytes, so we can see the ROM data)
+	fmt.Println("\n------------------------------------------------------------")
+	fmt.Printf("| %-56s |\n", "Memory Dump (0x0200 - 0x03FF)")
+	fmt.Println("------------------------------------------------------------")
+	
+	for addr := 512; addr < 1024; addr += 16 {
+		fmt.Printf("| 0x%04X | ", addr)
+		for j := 0; j < 16; j++ {
+			if j < 15 {
+				fmt.Printf("%02X ", cpu.memory[addr+j])
+			} else {
+				fmt.Printf("%02X", cpu.memory[addr+j])
+			}
+		}
+		fmt.Println(" |")
+	}
+	fmt.Println("------------------------------------------------------------")
 }
 
 
