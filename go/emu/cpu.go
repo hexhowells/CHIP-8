@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"math/rand/v2"
+	"github.com/gen2brain/beeep"
 )
 
 type CPU struct {
@@ -18,6 +19,8 @@ type CPU struct {
 	Opcode uint8
 	Oprand uint16
 	lookup []INSTRUCTION
+	DelayTimer uint8
+	SoundTimer uint8
 }
 
 
@@ -34,6 +37,8 @@ func NewCPU() *CPU {
 	cpu.lookup = []INSTRUCTION{
 		INSTRUCTION{"00E0", (*CPU)._00E0},
 	}
+
+	cpu.SoundTimer = 60
 
 	return &cpu
 }
@@ -129,6 +134,20 @@ func (cpu *CPU) Clock() {
 	cpu.Pc += 2
 
 	cpu.RunInstruction(ins)
+
+	if cpu.DelayTimer > 0 {
+		cpu.DelayTimer -= 1
+	}
+
+	if cpu.SoundTimer > 0 {
+		cpu.Beep()
+		cpu.SoundTimer -= 1
+	}
+}
+
+
+func (cpu *CPU) Beep() {
+	beeep.Beep(beeep.DefaultFreq, 300)
 }
 
 
