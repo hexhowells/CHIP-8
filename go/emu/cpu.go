@@ -206,10 +206,10 @@ func (cpu *CPU) RunInstruction(ins uint16) {
 
 
 func (cpu *CPU) Clock() {
-	ins := cpu.ReadInstruction(cpu.Pc)
+	//ins := cpu.ReadInstruction(cpu.Pc)
 	cpu.Pc += 2
 
-	cpu.RunInstruction(ins)
+	//cpu.RunInstruction(ins)
 
 	if cpu.DelayTimer > 0 {
 		cpu.DelayTimer -= 1
@@ -236,11 +236,6 @@ func (cpu *CPU) PressKey(num uint8, down bool) {
 	} else {
 		cpu.keys[num] = 0
 	}
-}
-
-
-func (cpu *CPU) _0NNN() {
-
 }
 
 
