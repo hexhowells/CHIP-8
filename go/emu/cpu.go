@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 	"math/rand/v2"
 	"github.com/gen2brain/beeep"
 )
@@ -43,7 +42,7 @@ var fontset = []uint8{
 	0xF0, 0x80, 0x80, 0x80, 0xF0, // C
 	0xE0, 0x90, 0x90, 0x90, 0xE0, // D
 	0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
-	0xF0, 0x80, 0xF0, 0x80, 0x80,  // F
+	0xF0, 0x80, 0xF0, 0x80, 0x80, // F
 }
 
 type CPU struct {
@@ -127,20 +126,6 @@ func (cpu *CPU) LoadROM(filepath string) {
 }
 
 
-func (cpu *CPU) ReadInstruction(addr uint16) uint16 {
-	return uint16(cpu.memory[addr]) << 8 | uint16(cpu.memory[addr + 1])
-}
-
-
-func (cpu *CPU) RunInstruction(ins uint16) {
-	cpu.Opcode = uint8((ins & 0xF000) >> 12)
-	cpu.Oprand = ins & 0x0FFF
-
-	inst := cpu.lookup[cpu.Opcode]
-	inst.Operate(cpu)
-}
-
-
 func (cpu *CPU) Clock() {
 	ins := cpu.ReadInstruction(cpu.Pc)
 	cpu.Pc += 2
@@ -157,6 +142,20 @@ func (cpu *CPU) Clock() {
 		// }
 		cpu.SoundTimer -= 1
 	}
+}
+
+
+func (cpu *CPU) ReadInstruction(addr uint16) uint16 {
+	return uint16(cpu.memory[addr]) << 8 | uint16(cpu.memory[addr + 1])
+}
+
+
+func (cpu *CPU) RunInstruction(ins uint16) {
+	cpu.Opcode = uint8((ins & 0xF000) >> 12)
+	cpu.Oprand = ins & 0x0FFF
+
+	inst := cpu.lookup[cpu.Opcode]
+	inst.Operate(cpu)
 }
 
 
