@@ -377,18 +377,24 @@ func (cpu *CPU) _EXA1() {
 }
 
 
+// set VX to delay timer
 func (cpu *CPU) _FX07() {
-	
+	vx := uint8((cpu.Oprand & 0x0F00) >> 8)
+	cpu.Vc[vx] = cpu.DelayTimer
 }
 
 
+// set delay timer
 func (cpu *CPU) _FX15() {
-	
+	vx := uint8((cpu.Oprand & 0x0F00) >> 8)
+	cpu.DelayTimer = cpu.Vc[vx]
 }
 
 
+// set sound timer
 func (cpu *CPU) _FX18() {
-	
+	vx := uint8((cpu.Oprand & 0x0F00) >> 8)
+	cpu.SoundTimer = cpu.Vc[vx]
 }
 
 
