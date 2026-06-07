@@ -12,9 +12,14 @@ import (
 )
 
 var (
-	user32             = windows.NewLazySystemDLL("user32.dll")
+	user32 = windows.NewLazySystemDLL("user32.dll")
 	procGetAsyncKeyState = user32.NewProc("GetAsyncKeyState")
 )
+
+// emulator config variables
+var clockHZ = 60
+var romPath = "../roms/ibm-logo.ch8"
+
 
 var keyMap = map[int]uint8{
 	0x31: 0x1, 0x32: 0x2, 0x33: 0x3, 0x34: 0xC,
@@ -29,8 +34,6 @@ var keypadLayout = [][]uint8{
 	{0x7, 0x8, 0x9, 0xE},
 	{0xA, 0x0, 0xB, 0xF},
 }
-
-var clockHZ = 60
 
 var hexToVK = make(map[uint8]int)
 
@@ -50,7 +53,7 @@ func isKeyDown(vk int) bool {
 
 func main() {
 	cpu := emu.NewCPU()
-	cpu.LoadROM("../roms/ibm-logo.ch8")
+	cpu.LoadROM(romPath)
 
 	if err := termbox.Init(); err != nil {
 		panic(err)
@@ -64,7 +67,7 @@ func main() {
 		stepChan = make(chan struct{})
 	)
 
-	go handleConsoleEvents(done, stepChan, &isPaused)
+	go handleConsoleEvents(cpu, done, stepChan, &isPaused)
 
 	// gorountine for sending keyboard inputs to emulator
 	go func() {
@@ -117,7 +120,7 @@ func main() {
 }
 
 
-func handleConsoleEvents(done chan struct{}, stepChan chan struct{}, isPaused *atomic.Bool) {
+func handleConsoleEvents(cpu *emu.CPU, done chan struct{}, stepChan chan struct{}, isPaused *atomic.Bool) {
 	for {
 		switch ev := termbox.PollEvent(); ev.Type {
 		case termbox.EventKey:
@@ -134,6 +137,9 @@ func handleConsoleEvents(done chan struct{}, stepChan chan struct{}, isPaused *a
 					default:
 					}
 				}
+			case termbox.KeyTab:
+				cpu.Reset()
+				cpu.LoadROM(romPath)
 			}
 		case termbox.EventError:
 			close(done)

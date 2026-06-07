@@ -94,6 +94,34 @@ func NewCPU() *CPU {
 }
 
 
+func (cpu *CPU) Reset() {
+	cpu.Pc = 0x0200
+	cpu.WaitKeyPressed = -1
+	cpu.I = 0x0000
+	cpu.Sp = 0x0000
+	cpu.DelayTimer = 0x00
+	cpu.SoundTimer = 0x00
+
+	var blankStack [16]uint16
+	cpu.stack = blankStack
+
+	var blankRegisters [16]uint8
+	cpu.Vc = blankRegisters
+
+	var blankScreen [32][64]uint8
+	cpu.Screen = blankScreen
+
+	var blankMemory [4096]uint8
+	cpu.memory = blankMemory
+
+	// load fonts into memory
+	for i := 0; i < len(fontset); i++ {
+		cpu.memory[i] = fontset[i]
+	}
+
+}
+
+
 func (cpu *CPU) LoadROM(filepath string) {
 	file, err := os.Open(filepath)
 
@@ -115,14 +143,11 @@ func (cpu *CPU) LoadROM(filepath string) {
 		return
 	}
 
-	numBytes, err := file.Read(cpu.memory[512:])
+	_, err = file.Read(cpu.memory[512:])
 	if err != nil {
 		fmt.Errorf("Failed to read ROM into memory: %v", err)
 		return
 	}
-
-	fmt.Printf("Read %d bytes into memory", numBytes)
-
 }
 
 
