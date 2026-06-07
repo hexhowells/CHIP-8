@@ -60,6 +60,10 @@ type CPU struct {
 	lookup []INSTRUCTION
 	DelayTimer uint8
 	SoundTimer uint8
+
+	WaitingForKey   bool
+    WaitKeyRegister uint8
+    WaitKeyPressed  int8  // -1 = no key currently pressed
 }
 
 
@@ -72,6 +76,7 @@ type INSTRUCTION struct {
 func NewCPU() *CPU {
 	cpu := CPU{}
 	cpu.Pc = 0x0200
+	cpu.WaitKeyPressed = -1
 
 	// load instruction lookup table
 	cpu.lookup = []INSTRUCTION{
@@ -85,8 +90,6 @@ func NewCPU() *CPU {
 	for i := 0; i < len(fontset); i++ {
 		cpu.memory[i] = fontset[i]
 	}
-
-	cpu.SoundTimer = 60
 
 	return &cpu
 }
@@ -220,7 +223,9 @@ func (cpu *CPU) Clock() {
 	}
 
 	if cpu.SoundTimer > 0 {
-		cpu.Beep()
+		// if cpu.SoundTimer == 1 {
+		// 	cpu.Beep()
+		// }
 		cpu.SoundTimer -= 1
 	}
 }
@@ -583,14 +588,32 @@ func (cpu *CPU) _FX1E() {
 
 // get key
 func (cpu *CPU) _FX0A() {
-	for i := 0; i < 16; i++ {
-		if cpu.keys[i] == 1 {
-			vx := uint8((cpu.Oprand & 0x0F00) >> 8)
-			cpu.Vc[vx] = uint8(i)
-			return
-		}
-	}
-	cpu.Pc -= 2
+	vx := uint8((cpu.Oprand & 0x0F00) >> 8)
+
+    if !cpu.WaitingForKey {
+        cpu.WaitingForKey = true
+        cpu.WaitKeyRegister = vx
+        cpu.WaitKeyPressed = -1
+    }
+
+    if cpu.WaitKeyPressed == -1 {
+        for i := 0; i < 16; i++ {
+            if cpu.keys[i] != 0 {
+                cpu.WaitKeyPressed = int8(i)
+                break
+            }
+        }
+    }
+
+    if cpu.WaitKeyPressed != -1 {
+        if cpu.keys[cpu.WaitKeyPressed] == 0 {
+            cpu.Vc[cpu.WaitKeyRegister] = uint8(cpu.WaitKeyPressed)
+            cpu.WaitingForKey = false
+            return 
+        }
+    }
+
+    cpu.Pc -= 2
 }
 
 
