@@ -340,13 +340,21 @@ func (cpu *CPU) _DXYN() {
 }
 
 
+// skip if key
 func (cpu *CPU) _EX9E() {
-	
+	vx := uint8((cpu.Oprand & 0x0F00) >> 8)
+	if cpu.keys[vx] == 0x01 {
+		cpu.Pc += 2
+	}
 }
 
 
+// skip if not key
 func (cpu *CPU) _EXA1() {
-	
+	vx := uint8((cpu.Oprand & 0x0F00) >> 8)
+	if cpu.keys[vx] == 0x00 {
+		cpu.Pc += 2
+	}
 }
 
 
