@@ -7,7 +7,7 @@ import (
 )
 
 type CPU struct {
-	Pc uint8  // program counter
+	Pc uint16  // program counter
 	I uint16  // index register
 	Vc [16]uint8  // variable registers (16 8-bit)
 	Stack [16]uint16
@@ -145,7 +145,7 @@ func (cpu *CPU) _00E0() {
 
 // jump
 func (cpu *CPU) _1NNN() {
-	cpu.Pc = cpu.oprand
+	cpu.Pc = cpu.oprand & 0x0FFF
 }
 
 
