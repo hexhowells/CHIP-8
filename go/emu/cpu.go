@@ -2,6 +2,7 @@ package emu
 
 import (
 	"fmt"
+	"log"
 	"strings"
 	"math/rand/v2"
 	"github.com/gen2brain/beeep"
@@ -171,7 +172,10 @@ func (cpu *CPU) Clock() {
 
 
 func (cpu *CPU) Beep() {
-	beeep.Beep(beeep.DefaultFreq, 300)
+	err := beeep.Beep(beeep.DefaultFreq, 300)
+	if err != nil {
+		log.Println("Failed to beep: %v", err)
+	}
 }
 
 
