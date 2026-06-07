@@ -187,7 +187,7 @@ func (cpu *CPU) _4XNN() {
 func (cpu *CPU) _5XY0() {
 	vx := uint8((cpu.oprand & 0x0F00) >> 8)
 	vy := uint8((cpu.oprand & 0x00F0) >> 4)
-	if cpu.Vc[vx] == cpu.Vc[vx] {
+	if cpu.Vc[vx] == cpu.Vc[vy] {
 		cpu.Pc += 2
 	}
 }
@@ -197,7 +197,7 @@ func (cpu *CPU) _5XY0() {
 func (cpu *CPU) _9XY0() {
 	vx := uint8((cpu.oprand & 0x0F00) >> 8)
 	vy := uint8((cpu.oprand & 0x00F0) >> 4)
-	if cpu.Vc[vx] != cpu.Vc[vx] {
+	if cpu.Vc[vx] != cpu.Vc[vy] {
 		cpu.Pc += 2
 	}
 }
