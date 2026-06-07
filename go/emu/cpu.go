@@ -512,8 +512,26 @@ func (cpu *CPU) _CXNN() {
 }
 
 
+// display
 func (cpu *CPU) _DXYN() {
-	
+	vx := uint8((cpu.Oprand & 0x0F00) >> 8) % 63
+	vy := uint8((cpu.Oprand & 0x00F0) >> 4) % 31
+	x := cpu.Vc[vx]
+	y := cpu.Vc[vy]
+	n := cpu.Oprand & 0x000F
+	cpu.Vc[0xF] = 0
+
+	for r := uint16(0); r < n; r++ {
+		pixel := cpu.memory[cpu.I + r]
+		for c := uint8(0); c < 8; c++ {
+			if (pixel & (0x80 >> c)) != 0 {
+				if cpu.Screen[(y + uint8(r))][x + c] == 1 {
+					cpu.Vc[0xF] = 1
+				}
+				cpu.Screen[(y + uint8(r))][x + c] ^= 1
+			}
+		}
+	}
 }
 
 
