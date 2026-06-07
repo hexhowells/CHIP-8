@@ -3,6 +3,7 @@ package emu
 import (
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"math/rand/v2"
 	"github.com/gen2brain/beeep"
@@ -84,6 +85,38 @@ func NewCPU() *CPU {
 	cpu.SoundTimer = 60
 
 	return &cpu
+}
+
+
+func (cpu *CPU) LoadROM(filepath string) {
+	file, err := os.Open(filepath)
+
+	if err != nil {
+		log.Println("Failed to open ROM file: %v", err)
+		return
+	}
+
+	defer file.Close()
+
+	info, err := file.Stat()
+
+	if err != nil {
+		log.Println("Failed to read metadata on ROM file: %v", err)
+	}
+
+	if int64(len(cpu.memory) - 512) < info.Size() {
+		fmt.Errorf("ROM is larger than available memory!")
+		return
+	}
+
+	numBytes, err := file.Read(cpu.memory[512:])
+	if err != nil {
+		fmt.Errorf("Failed to read ROM into memory: %v", err)
+		return
+	}
+
+	fmt.Printf("Read %d bytes into memory", numBytes)
+
 }
 
 
