@@ -8,7 +8,25 @@ import (
 	"github.com/gen2brain/beeep"
 )
 
-var fontset = uint8[]{
+/*
+CHIP-8 Instruction Breakdown
+[Each instruction is 2 bytes]
+
+The 2 bytes can be broken down into different sections (layed out below). How the instruction is broken down
+depends on the Specific instruction being run.
+
+1010 0010 0110 1011
+
+OP - first nibble, primary Opcode group (1010)
+VC (VX/X) - second nibble, usually looking up one of the registers (V0 - VF) (0010)
+Y  (VY) - third nibble, usually looking up a second register (0110)
+N - fourth nibble, a 4-bit immediate value (1011)
+KK (NN) - second byte (last two nibbles), a 8-bit immediate value (0110 1011)
+NNN - last three nibbles, a 12-bit immediate memory address (0010 0110 1011)
+
+*/
+
+var fontset = []uint8{
 	0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
 	0x20, 0x60, 0x20, 0x20, 0x70, // 1
 	0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
@@ -24,7 +42,7 @@ var fontset = uint8[]{
 	0xF0, 0x80, 0x80, 0x80, 0xF0, // C
 	0xE0, 0x90, 0x90, 0x90, 0xE0, // D
 	0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
-	0xF0, 0x80, 0xF0, 0x80, 0x80  // F
+	0xF0, 0x80, 0xF0, 0x80, 0x80,  // F
 }
 
 type CPU struct {
@@ -124,23 +142,6 @@ func (cpu *CPU) ReadInstruction(addr uint16) uint16 {
 }
 
 
-/*
-CHIP-8 Instruction Breakdown
-[Each instruction is 2 bytes]
-
-The 2 bytes can be broken down into different sections (layed out below). How the instruction is broken down
-depends on the Specific instruction being run.
-
-1010 0010 0110 1011
-
-OP - first nibble, primary Opcode group (1010)
-VC (VX/X) - second nibble, usually looking up one of the registers (V0 - VF) (0010)
-Y  (VY) - third nibble, usually looking up a second register (0110)
-N - fourth nibble, a 4-bit immediate value (1011)
-KK (NN) - second byte (last two nibbles), a 8-bit immediate value (0110 1011)
-NNN - last three nibbles, a 12-bit immediate memory address (0010 0110 1011)
-
-*/
 func (cpu *CPU) RunInstruction(ins uint16) {
 	cpu.Opcode = uint8((ins & 0xF000) >> 12)
 	cpu.Oprand = ins & 0x0FFF
