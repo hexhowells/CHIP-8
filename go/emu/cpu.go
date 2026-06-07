@@ -314,14 +314,14 @@ func (cpu *CPU) _ANNN() {
 
 // jump with offset
 func (cpu *CPU) _BNNN() {
-	cpu.Pc = (cpu.oprand & 0x0FFF) + cpu.Vc[0x00]
+	cpu.Pc = (cpu.oprand & 0x0FFF) + uint16(cpu.Vc[0x00])
 }
 
 
 // random number generator
 func (cpu *CPU) _CXNN() {
 	vx := uint8((cpu.oprand & 0x0F00) >> 8)
-	cpu.Vc[vx] = uint8(rand.Uint32()) & (cpu.oprand & 0x00FF)
+	cpu.Vc[vx] = uint8(rand.Uint32()) & uint8(cpu.oprand & 0x00FF)
 }
 
 
@@ -358,7 +358,7 @@ func (cpu *CPU) _FX18() {
 // add to index
 func (cpu *CPU) _FX1E() {
 	vx := uint8((cpu.oprand & 0x0F00) >> 8)
-	cpu.I += cpu.Vc[vx]
+	cpu.I += uint16(cpu.Vc[vx])
 }
 
 
