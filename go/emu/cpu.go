@@ -56,7 +56,39 @@ func (cpu *CPU) Render() {
 }
 
 
-func (cpu *CPU) ReadInstruction(addr uint8) uint16 {
+func (cpu *CPU) PrintCPU() {
+	fmt.Println("\n------------------------------------------------------------")
+	fmt.Printf("| %-12s | %-13s | %-25s |\n", "Field", "Value", "Description")
+	fmt.Println("------------------------------------------------------------")
+	fmt.Printf("| %-12s | $%-12.4X | %-25s |\n", "pc", cpu.Pc, "Program counter (8-bit)")
+	fmt.Printf("| %-12s | $%-12.4X | %-25s |\n", "i", cpu.I, "Index register (16-bit)")
+	fmt.Printf("| %-12s | $%-12.4X | %-25s |\n", "sp", cpu.sp, "Stack pointer")
+	fmt.Printf("| %-12s | $%-12.2X | %-25s |\n", "opcode", cpu.opcode, "Current opcode byte")
+	fmt.Printf("| %-12s | $%-12.4X | %-25s |\n", "oprand", cpu.oprand, "Current operand")
+	
+	stackVal := "N/A"
+	if cpu.sp < 16 {
+		stackVal = fmt.Sprintf("$%.4X", cpu.Stack[cpu.sp])
+	}
+	fmt.Printf("| %-12s | %-13s | %-25s |\n", "stack[sp]", stackVal, "Value at top of stack")
+	
+	fmt.Println("------------------------------------------------------------")
+	fmt.Printf("| %-43s |\n", "Variable Registers (V0 - VF)")
+	fmt.Println("------------------------------------------------------------")
+	
+	for i := 0; i < 16; i += 4 {
+		fmt.Printf("| V%X: $%.2X   | V%X: $%.2X   | V%X: $%.2X   | V%X: $%.2X   |\n",
+			i, cpu.Vc[i], 
+			i+1, cpu.Vc[i+1], 
+			i+2, cpu.Vc[i+2], 
+			i+3, cpu.Vc[i+3],
+		)
+	}
+	fmt.Println("------------------------------------------------------------")
+}
+
+
+func (cpu *CPU) ReadInstruction(addr uint16) uint16 {
 	return uint16(cpu.Memory[addr]) << 8 | uint16(cpu.Memory[addr + 1])
 }
 
