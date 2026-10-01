@@ -40,7 +40,7 @@ impl CPU {
     pub fn run_instruction(&mut self, ins: u16) {
         self.opcode = ((ins & 0xF000) >> 12) as u8;
         self.oprand = ins & 0x0FFF;
-        self._7XNN();
+        self._7xnn();
     }
 
 
@@ -50,14 +50,14 @@ impl CPU {
 
 
     // set VX to NN
-    fn _6XNN(&mut self) {
+    fn _6xnn(&mut self) {
         let vx = ((self.oprand & 0x0F00) >> 8) as usize;
         self.vc[vx] = (self.oprand & 0x00FF) as u8;
     }
 
-    
+
     // add
-    fn _7XNN(&mut self) {
+    fn _7xnn(&mut self) {
         let vx = ((self.oprand & 0x0F00) >> 8) as usize;
         self.vc[vx] += (self.oprand & 0x00FF) as u8;
     }
