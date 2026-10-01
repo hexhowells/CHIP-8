@@ -398,12 +398,15 @@ func (cpu *CPU) _8XY3() {
 func (cpu *CPU) _8XY4() {
 	vx := uint8((cpu.Oprand & 0x0F00) >> 8)
 	vy := uint8((cpu.Oprand & 0x00F0) >> 4)
-	sum := cpu.Vc[vx] + cpu.Vc[vy]
+	sum := uint16(cpu.Vc[vx]) + uint16(cpu.Vc[vy])
 
-	if sum < cpu.Vc[vx] {
+	cpu.Vc[vx] = uint8(sum & 0xFF)
+
+	if sum > 0x00FF {
 		cpu.Vc[0x0F] = 0x01
+	} else {
+		cpu.Vc[0x0F] = 0x00
 	}
-	cpu.Vc[vx] = sum
 }
 
 
