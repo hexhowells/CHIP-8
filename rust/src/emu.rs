@@ -309,7 +309,9 @@ impl CPU {
     // add
     fn _7xnn(&mut self) {
         let vx = ((self.oprand & 0x0F00) >> 8) as usize;
-        self.vc[vx] += (self.oprand & 0x00FF) as u8;
+        let nn = (self.oprand & 0x00FF) as u8;
+
+        self.vc[vx] = self.vc[vx].wrapping_add(nn);
     }
 
 
@@ -354,15 +356,12 @@ impl CPU {
         let vx = ((self.oprand & 0x0F00) >> 8) as usize;
         let vy = ((self.oprand & 0x00F0) >> 4) as usize;
 
-        let sum = (self.vc[vx]) as u16 + (self.vc[vy]) as u16;
+        //let sum = (self.vc[vx]) as u16 + (self.vc[vy]) as u16;
+        let (sum, overflowed) = self.vc[vx].overflowing_add(self.vc[vy]);
 
-        self.vc[vx] = (sum & 0x00FF) as u8;
+        self.vc[vx] = sum;
 
-        if sum > 0xFF {
-            self.vc[0x0F] = 0x01;
-        } else {
-            self.vc[0x0F] = 0x00;
-        }
+        self.vc[0x0F] = overflowed as u8;
     }
 
 
@@ -377,7 +376,7 @@ impl CPU {
             self.vc[0x0F] = 0x00;
         }
         
-        self.vc[vx] -= self.vc[vy];
+        self.vc[vx] = self.vc[vx].wrapping_sub(self.vc[vy]);
     }
 
 
