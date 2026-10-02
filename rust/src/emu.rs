@@ -132,14 +132,14 @@ impl CPU {
     pub fn load_rom(&mut self, filepath: &str) -> io::Result<()> {
         let rom_data = fs::read(filepath)?;
 
-        if rom_data.len() > 3584 {
+        if rom_data.len() > (self.memory.len() - 512) {
             return Err(Error::new(
                 ErrorKind::InvalidData,
-                "Rom Exceeds maximum size of 3584 bytes",
+                "ROM is larger than available memory!",
             ));
         }
 
-        let start = 0x200;
+        let start = 0x0200;
         let end = start + rom_data.len();
 
         self.memory[start..end].copy_from_slice(&rom_data);
