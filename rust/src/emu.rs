@@ -1,13 +1,15 @@
-#[derive(Debug)]
+use std::fmt;
+
+
 pub struct CPU {
     pc: u16,
     i: u16,  // index register
     vc: [u8; 16],  // variable registers
     stack: [u16; 16],
     sp: u16,
-    // keys: [u16; 16],
-    // memory: [u8; 4096],
-    // screen: [[u8; 32]; 64],
+    keys: [u16; 16],
+    memory: [u8; 4096],
+    screen: [[u8; 32]; 64],
     opcode: u8,
     oprand: u16,
     // lookup: [instruction; 16],
@@ -23,6 +25,22 @@ struct Instruction {
     operate: fn(),
 }
 
+
+impl fmt::Debug for CPU {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("CPU")
+            .field("pc", &format_args!("{:#06X}", self.pc))
+            .field("i", &format_args!("{:#04X}", self.i))
+            .field("vc", &self.vc)
+            .field("stack", &self.stack)
+            .field("sp", &format_args!("{:#06X}", self.sp))
+            .field("opcode", &format_args!("{:#06X}", self.opcode))
+            .field("oprand", &format_args!("{:#06X}", self.oprand))
+            .finish_non_exhaustive()
+    }
+}
+
+
 impl CPU {
     pub fn new() -> Self {
         Self {
@@ -31,6 +49,9 @@ impl CPU {
             vc: [0x0000; 16],
             stack: [0x0000; 16],
             sp: 0x0000,
+            keys: [0x0000; 16],
+            memory: [0x00; 4096],
+            screen: [[0x00; 32]; 64],
             opcode: 0x00,
             oprand: 0x0000
         }
