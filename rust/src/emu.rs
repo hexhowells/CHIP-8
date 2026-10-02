@@ -178,7 +178,7 @@ impl CPU {
     }
 
 
-    fn press_key(&mut self, num: usize, down: bool) {
+    pub fn press_key(&mut self, num: usize, down: bool) {
         if down {
             self.keys[num] = 1;
         } else {
