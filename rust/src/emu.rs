@@ -30,7 +30,7 @@ pub struct CPU {
     sp: u16,
     keys: [u16; 16],
     memory: [u8; 4096],
-    screen: [[u8; 32]; 64],
+    screen: [[u8; 64]; 32],
     opcode: u8,
     oprand: u16,
     lookup: [Instruction; 16],
@@ -72,7 +72,7 @@ impl CPU {
             sp: 0x0000,
             keys: [0x0000; 16],
             memory: [0x00; 4096],
-            screen: [[0x00; 32]; 64],
+            screen: [[0x00; 64]; 32],
             opcode: 0x00,
             oprand: 0x0000,
             lookup: [
@@ -110,6 +110,22 @@ impl CPU {
 
     pub fn show_state(&self) {
         println!("{:?}", self);
+    }
+
+
+    pub fn display_screen(&self) {
+        print!("\x1B[2J\x1B[1;1H");
+
+        for row in self.screen.iter() {
+            for &pixel in row.iter() {
+                if pixel == 1 {
+                    print!("█");
+                } else {
+                    print!(" ");
+                }
+            }
+            println!();
+        }
     }
 
 
@@ -201,7 +217,7 @@ impl CPU {
 
 
     fn _mape(&mut self) {
-        let n = (self.oprand & 0x000f) as u8;
+        let n = (self.oprand & 0x00ff) as u8;
 
         match n {
             0x9E => self._ex9e(),
@@ -212,7 +228,7 @@ impl CPU {
 
 
     fn _mapf(&mut self) {
-        let n = (self.oprand & 0x000f) as u8;
+        let n = (self.oprand & 0x00ff) as u8;
 
         match n {
             0x07 => self._fx07(),
@@ -231,7 +247,7 @@ impl CPU {
 
     // clear screen
     fn _00e0(&mut self) {
-        self.screen = [[0x00; 32]; 64];
+        self.screen = [[0x00; 64]; 32];
     }
 
 
@@ -245,7 +261,7 @@ impl CPU {
     fn _00ee(&mut self) {
         self.pc = self.stack[(self.sp - 1) as usize];
         self.stack[self.sp as usize] = 0x0000;
-        self.pc = self.oprand;
+        self.sp -= 1;
     }
 
 
@@ -435,17 +451,19 @@ impl CPU {
     fn _dxyn(&mut self) {
         let vx = ((self.oprand & 0x0F00) >> 8) as usize;
         let vy = ((self.oprand & 0x00F0) >> 4) as usize;
-        let x = self.vc[vx];
-        let y = self.vc[vy];
-        let n = self.oprand & 0x000F;
+        
+        let x = (self.vc[vx] as usize) % 64;
+        let y = (self.vc[vy] as usize) % 32;
+        
+        let n = (self.oprand & 0x000F) as usize;
         self.vc[0xF] = 0;
 
         for r in 0..n {
-            let pixel = self.memory[(self.i + r) as usize];
+            let pixel = self.memory[self.i as usize + r];
             for c in 0..8 {
                 if (pixel & (0x80 >> c)) != 0 {
-                    let row = (y + (r as u8)) as usize;
-                    let col = (x + c) as usize;
+                    let row = (y + r) % 32;
+                    let col = (x + c) % 64;
 
                     if self.screen[row][col] == 1 {
                         self.vc[0xF] = 1;
