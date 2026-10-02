@@ -1,7 +1,9 @@
 use std::fmt;
+use std::fs;
+use std::io::{self, Error, ErrorKind};
 
 
-static fontset: [u8; 80] = [
+static FONTSET: [u8; 80] = [
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
 	0x20, 0x60, 0x20, 0x20, 0x70, // 1
 	0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
@@ -31,7 +33,7 @@ pub struct CPU {
     screen: [[u8; 32]; 64],
     opcode: u8,
     oprand: u16,
-    lookup: [Instruction; 2],
+    lookup: [Instruction; 16],
     delay_timer: u8,
     sound_timer: u8,
     waiting_for_key: bool,
@@ -62,7 +64,7 @@ impl fmt::Debug for CPU {
 
 impl CPU {
     pub fn new() -> Self {
-        Self {
+        let mut cpu = Self {
             pc: 0x200,
             i: 0x0000,
             vc: [0x0000; 16],
@@ -74,23 +76,75 @@ impl CPU {
             opcode: 0x00,
             oprand: 0x0000,
             lookup: [
+                Instruction{name: "MAP0", operate: CPU::_map0},
                 Instruction{name: "1NNN", operate: CPU::_1nnn},
                 Instruction{name: "2NNN", operate: CPU::_2nnn},
+                Instruction{name: "3XNN", operate: CPU::_3xnn},
+                Instruction{name: "4XNN", operate: CPU::_4xnn},
+                Instruction{name: "5XY0", operate: CPU::_5xy0},
+                Instruction{name: "6XNN", operate: CPU::_6xnn},
+                Instruction{name: "7XNN", operate: CPU::_7xnn},
+                Instruction{name: "MAP8", operate: CPU::_map8},
+                Instruction{name: "9XY0", operate: CPU::_9xy0},
+                Instruction{name: "ANNN", operate: CPU::_annn},
+                Instruction{name: "BNNN", operate: CPU::_bnnn},
+                Instruction{name: "CXNN", operate: CPU::_cxnn},
+                Instruction{name: "DXYN", operate: CPU::_dxyn},
+                Instruction{name: "MAPE", operate: CPU::_mape},
+                Instruction{name: "MAPF", operate: CPU::_mapf},
                 ],
             delay_timer: 0x00,
             sound_timer: 0x00,
             waiting_for_key: false,
             wait_key_register: 0x00,
             wait_key_pressed: -1
+        };
+
+        // load fonts into memory
+        for i in 0..FONTSET.len() {
+            cpu.memory[i] = FONTSET[i];
         }
+        cpu
+    }
+
+
+    pub fn show_state(&self) {
+        println!("{:?}", self);
+    }
+
+
+    pub fn load_rom(&mut self, filepath: &str) -> io::Result<()> {
+        let rom_data = fs::read(filepath)?;
+
+        if rom_data.len() > 3584 {
+            return Err(Error::new(
+                ErrorKind::InvalidData,
+                "Rom Exceeds maximum size of 3584 bytes",
+            ));
+        }
+
+        let start = 0x200;
+        let end = start + rom_data.len();
+
+        self.memory[start..end].copy_from_slice(&rom_data);
+
+        Ok(())
     }
 
 
     pub fn clock(&mut self) {
         let ins = self.read_instruction(self.pc as usize);
-        self.pc += 1;
+        self.pc += 2;
 
         self.run_instruction(ins);
+
+        if self.delay_timer > 0 {
+            self.delay_timer -= 1;
+        }
+
+        if self.sound_timer > 0 {
+            self.sound_timer -= 1;
+        }
     }
 
 
@@ -102,17 +156,81 @@ impl CPU {
     pub fn run_instruction(&mut self, ins: u16) {
         self.opcode = ((ins & 0xF000) >> 12) as u8;
         self.oprand = ins & 0x0FFF;
-        self._7xnn();
+        
+        let inst_fn = self.lookup[self.opcode as usize].operate;
+        inst_fn(self);
     }
 
 
-    pub fn show_state(&self) {
-        println!("{:?}", self);
+    fn press_key(&mut self, num: usize, down: bool) {
+        if down {
+            self.keys[num] = 1;
+        } else {
+            self.keys[num] = 0;
+        }
+    }
+
+
+    fn _map0(&mut self) {
+        let n = (self.oprand & 0x000f) as u8;
+
+        match n {
+            0x00 => self._00e0(),
+            0x0E => self._00ee(),
+            _ => println!("Invalid instruction nibble for 0")
+        }
+    }
+
+
+    fn _map8(&mut self) {
+        let n = (self.oprand & 0x000f) as u8;
+
+        match n {
+            0x00 => self._8xy0(),
+            0x01 => self._8xy1(),
+            0x02 => self._8xy2(),
+            0x03 => self._8xy3(),
+            0x04 => self._8xy4(),
+            0x05 => self._8xy5(),
+            0x06 => self._8xy6(),
+            0x07 => self._8xy7(),
+            0x0E => self._8xye(),
+            _ => println!("Invalid instruction nibble for 0")
+        }
+    }
+
+
+    fn _mape(&mut self) {
+        let n = (self.oprand & 0x000f) as u8;
+
+        match n {
+            0x9E => self._ex9e(),
+            0xA1 => self._exa1(),
+            _ => println!("Invalid instruction nibble for 0")
+        }
+    }
+
+
+    fn _mapf(&mut self) {
+        let n = (self.oprand & 0x000f) as u8;
+
+        match n {
+            0x07 => self._fx07(),
+            0x15 => self._fx15(),
+            0x18 => self._fx18(),
+            0x1E => self._fx1e(),
+            0x0A => self._fx0a(),
+            0x29 => self._fx29(),
+            0x33 => self._fx33(),
+            0x55 => self._fx55(),
+            0x65 => self._fx65(),
+            _ => println!("Invalid instruction nibble for 0")
+        }
     }
 
 
     // clear screen
-    fn _00E0(&mut self) {
+    fn _00e0(&mut self) {
         self.screen = [[0x00; 32]; 64];
     }
 
@@ -173,7 +291,7 @@ impl CPU {
     // skip one instruction if VX != VY
     fn _9xy0(&mut self) {
         let vx = ((self.oprand & 0x0F00) >> 8) as usize;
-        let vy = ((self.oprand * 0x00F0) >> 4) as usize;
+        let vy = ((self.oprand & 0x00F0) >> 4) as usize;
 
         if self.vc[vx] != self.vc[vy] {
             self.pc += 2;
@@ -430,7 +548,7 @@ impl CPU {
         let val = self.vc[vx];
         
         self.memory[self.i as usize] = val / 100;
-        self.memory[(self.i + 1) as usize] = (val / 100) % 10;
+        self.memory[(self.i + 1) as usize] = (val / 10) % 10;
         self.memory[(self.i + 2) as usize] = val % 10
     }
 

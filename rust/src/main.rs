@@ -4,12 +4,10 @@ fn main() {
     let mut cpu = emu::CPU::new();
     cpu.show_state();
 
-    let n = 2;
+    let _ = cpu.load_rom("../roms/test_opcode.ch8");
 
-    for _ in 0..n {
-        cpu.run_instruction(0x0204);
+    for _ in 0..100 {
+        cpu.clock();
         cpu.show_state();
     }
-
-    
 }
