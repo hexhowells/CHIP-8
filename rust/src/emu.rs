@@ -65,7 +65,7 @@ impl fmt::Debug for CPU {
 impl CPU {
     pub fn new() -> Self {
         let mut cpu = Self {
-            pc: 0x200,
+            pc: 0x0200,
             i: 0x0000,
             vc: [0x0000; 16],
             stack: [0x0000; 16],
