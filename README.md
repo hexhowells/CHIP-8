@@ -11,7 +11,7 @@ The purpose of this repo is to contain implementations of the CHIP-8 emulator in
 
 ## Languages
 - [X] Go
-- [ ] Rust
+- [X] Rust
 - [ ] Python
 - [ ] C
 - [ ] Nim
