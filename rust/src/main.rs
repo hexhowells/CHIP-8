@@ -44,7 +44,7 @@ fn main() -> io::Result<()> {
             let display = Paragraph::new(screen_text)
                 .block(Block::default().title(" CHIP-8 ").borders(Borders::ALL));
             
-            f.render_widget(display, f.size());
+            f.render_widget(display, f.area());
         })?;
 
         
