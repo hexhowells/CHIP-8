@@ -18,7 +18,7 @@ var (
 
 // emulator config variables
 var clockHZ = 60
-var romPath = "../roms/ibm-logo.ch8"
+var romPath = "../roms/keypad-test.ch8"
 
 
 var keyMap = map[int]uint8{

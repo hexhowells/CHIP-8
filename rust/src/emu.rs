@@ -30,7 +30,7 @@ pub struct CPU {
     sp: u16,
     keys: [u16; 16],
     memory: [u8; 4096],
-    screen: [[u8; 64]; 32],
+    pub screen: [[u8; 64]; 32],
     opcode: u8,
     oprand: u16,
     lookup: [Instruction; 16],
