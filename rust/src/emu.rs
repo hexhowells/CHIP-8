@@ -494,7 +494,7 @@ impl CPU {
     fn _exa1(&mut self) {
         let vx = ((self.oprand & 0x0F00) >> 8) as usize;
         if self.keys[vx] == 0x00 {
-            self.pc += 1;
+            self.pc += 2;
         }
     }
 
