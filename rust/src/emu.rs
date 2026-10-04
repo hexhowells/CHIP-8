@@ -446,7 +446,9 @@ impl CPU {
     fn _cxnn(&mut self) {
         let vx = ((self.oprand & 0x0F00) >> 8) as usize;
         let random_u8: u8 = rand::random();
-        self.vc[vx] = random_u8 + (self.oprand & 0x00FF) as u8;
+        let nn = (self.oprand & 0x00FF) as u8;
+        
+        self.vc[vx] = random_u8 & nn;
     }
 
 
