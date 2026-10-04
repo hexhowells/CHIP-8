@@ -195,7 +195,7 @@ impl CPU {
         match n {
             0x00 => self._00e0(),
             0x0E => self._00ee(),
-            _ => println!("Invalid instruction nibble for 0")
+            _ => println!("Invalid instruction nibble for map0: {}", n)
         }
     }
 
@@ -213,7 +213,7 @@ impl CPU {
             0x06 => self._8xy6(),
             0x07 => self._8xy7(),
             0x0E => self._8xye(),
-            _ => println!("Invalid instruction nibble for 0")
+            _ => println!("Invalid instruction nibble for map8: {}", n)
         }
     }
 
@@ -224,7 +224,7 @@ impl CPU {
         match n {
             0x9E => self._ex9e(),
             0xA1 => self._exa1(),
-            _ => println!("Invalid instruction nibble for 0")
+            _ => println!("Invalid instruction nibble for mapE: {}". n)
         }
     }
 
@@ -242,7 +242,7 @@ impl CPU {
             0x33 => self._fx33(),
             0x55 => self._fx55(),
             0x65 => self._fx65(),
-            _ => println!("Invalid instruction nibble for 0")
+            _ => println!("Invalid instruction nibble for mapF: {}", n)
         }
     }
 
