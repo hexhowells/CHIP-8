@@ -224,7 +224,7 @@ impl CPU {
         match n {
             0x9E => self._ex9e(),
             0xA1 => self._exa1(),
-            _ => println!("Invalid instruction nibble for mapE: {}". n)
+            _ => println!("Invalid instruction nibble for mapE: {}", n)
         }
     }
 
