@@ -31,6 +31,7 @@ pub struct CPU {
     keys: [u16; 16],
     memory: [u8; 4096],
     pub screen: [[u8; 64]; 32],
+    pub screen_changed: bool,
     opcode: u8,
     oprand: u16,
     lookup: [Instruction; 16],
@@ -73,6 +74,7 @@ impl CPU {
             keys: [0x0000; 16],
             memory: [0x00; 4096],
             screen: [[0x00; 64]; 32],
+            screen_changed: false,
             opcode: 0x00,
             oprand: 0x0000,
             lookup: [
@@ -248,6 +250,7 @@ impl CPU {
     // clear screen
     fn _00e0(&mut self) {
         self.screen = [[0x00; 64]; 32];
+        self.screen_changed = true;
     }
 
 
@@ -472,6 +475,7 @@ impl CPU {
                 }
             }
         }
+        self.screen_changed = true;
     }
 
 

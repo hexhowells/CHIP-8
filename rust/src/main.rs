@@ -32,20 +32,24 @@ fn main() -> io::Result<()> {
     let mut last_frame = Instant::now();
 
     loop {
-        terminal.draw(|f| {
-            let mut screen_text = String::with_capacity(64 * 32);
-            for row in cpu.screen.iter() {
-                for &pixel in row.iter() {
-                    screen_text.push(if pixel == 1 { '█' } else { ' ' });
+        if cpu.screen_changed {
+            terminal.draw(|f| {
+                let mut screen_text = String::with_capacity(64 * 32);
+                for row in cpu.screen.iter() {
+                    for &pixel in row.iter() {
+                        screen_text.push(if pixel == 1 { '█' } else { '·' });
+                    }
+                    screen_text.push('\n');
                 }
-                screen_text.push('\n');
-            }
 
-            let display = Paragraph::new(screen_text)
-                .block(Block::default().title(" CHIP-8 ").borders(Borders::ALL));
-            
-            f.render_widget(display, f.area());
-        })?;
+                let display = Paragraph::new(screen_text)
+                    .block(Block::default().title(" CHIP-8 ").borders(Borders::ALL));
+                
+                f.render_widget(display, f.area());
+            })?;
+
+            cpu.screen_changed = false;
+        }
 
         
         if last_frame.elapsed() >= frame_rate {
