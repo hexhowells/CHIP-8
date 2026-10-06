@@ -1,3 +1,5 @@
 *.ch8
 !ibm-logo.ch8
+!test-opcode.ch8
+!keypad-test.ch8
 target/
